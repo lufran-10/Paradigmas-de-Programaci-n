@@ -32,3 +32,15 @@
 -- evaluarEnCero està currificada ya que toma un único argumento!!
 
 
+-- dosVeces = \f -> f . f
+-- dosVeces :: (a -> a) -> a -> a
+-- dosVeces está currificada ya que toma un único argumento!!
+
+
+-- flipAll = map flip
+-- flipAll :: [a -> b -> c] -> [b -> a -> c]
+-- flipAll está currificada ya que toma un único argumento!!
+
+
+-- flipRaro = flip flip
+-- FALTA!!!
