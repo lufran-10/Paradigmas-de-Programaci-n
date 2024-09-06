@@ -130,6 +130,42 @@ eliminarChar _ [] = []
 eliminarChar c (y:ys) | c == y = eliminarChar c ys
                       | otherwise = y : eliminarChar c ys
 
--- b)
---difPromedio :: [Float] -> [Float]
---difPromedio
+-- b) PROBAR SI FUNCIONA!!!
+difPromedio :: [Float] -> [Float]
+difPromedio [] = []
+difPromedio (x:xs) = (x - promedio (x:xs)) : difPromedio xs
+
+sumatoria :: [Float] -> Float
+sumatoria [] = 0
+sumatoria (x:xs) = x + sumatoria xs
+
+longitud :: [Float] -> Float
+longitud [] = 0
+longitud (x:xs) = 1 + sumatoria xs
+
+promedio :: [Float] -> Float
+promedio [] = 0
+promedio (x:xs) = sumatoria (x:xs) / longitud (x:xs)
+
+-- c) PROBAR SI FUNCIONA!!!
+todosIguales :: [Int] -> Bool
+todosIguales [] = True
+todosIguales (y:[]) = True
+todosIguales (x:y:ys) | if x == y then todosIguales (y:ys) else False
+
+-- Ejercicio 5
+-- Modelo para àrboles binarios: AB a = Nil | Bin (AB a) a Bin (AB a)
+
+-- a) PROBAR SI FUNCIONA!!!
+vacioAB :: AB a -> Bool
+vacioAB a = if a == Nil then True else False
+
+-- b) PROBAR SI FUNCIONA!!!
+negacionAB :: AB Bool -> AB Bool
+negacionAB Nil = Nil
+negacionAB (Bin izq valor der) = Bin (negacionAB izq) (not a) Bin(negacionAB der)
+
+-- c) PROBAR SI FUNCIONA!!!
+productoAB :: AB Int -> Int
+productoAB Nil = 1
+productoAB (Bin izq valor der) = productoAB izq * valor * productoAB der
