@@ -130,10 +130,9 @@ eliminarChar _ [] = []
 eliminarChar c (y:ys) | c == y = eliminarChar c ys
                       | otherwise = y : eliminarChar c ys
 
--- b) PROBAR SI FUNCIONA!!!
+-- b)
 difPromedio :: [Float] -> [Float]
-difPromedio [] = []
-difPromedio (x:xs) = (x - promedio (x:xs)) : difPromedio xs
+difPromedio xs = map (\x -> x - promedio xs) xs
 
 sumatoria :: [Float] -> Float
 sumatoria [] = 0
@@ -141,31 +140,51 @@ sumatoria (x:xs) = x + sumatoria xs
 
 longitud :: [Float] -> Float
 longitud [] = 0
-longitud (x:xs) = 1 + sumatoria xs
+longitud (x:xs) = 1 + longitud xs
 
 promedio :: [Float] -> Float
 promedio [] = 0
-promedio (x:xs) = sumatoria (x:xs) / longitud (x:xs)
+promedio xs = (sumatoria xs) / (longitud xs)
 
--- c) PROBAR SI FUNCIONA!!!
+-- c)
 todosIguales :: [Int] -> Bool
 todosIguales [] = True
 todosIguales (y:[]) = True
-todosIguales (x:y:ys) | if x == y then todosIguales (y:ys) else False
+todosIguales (x:y:ys) = if x == y then todosIguales (y:ys) else False
 
 -- Ejercicio 5
--- Modelo para àrboles binarios: AB a = Nil | Bin (AB a) a Bin (AB a)
+-- Modelo para àrboles binarios:
+data AB a = Nil | Bin (AB a) a (AB a)
+  deriving (Show, Eq)         -- Para poder imprimir el arbol
 
--- a) PROBAR SI FUNCIONA!!!
+-- Para probar contruí estos árboles:
+arbolVacio :: AB a
+arbolVacio = Nil
+
+arbolNoVacioEntero :: AB Int
+arbolNoVacioEntero = Bin 
+                (Bin Nil 2 Nil)
+                1
+                (Bin Nil 3 Nil)
+
+arbolNoVacioBool :: AB Bool
+arbolNoVacioBool = Bin 
+                (Bin Nil True Nil)
+                False
+                (Bin Nil False Nil)
+
+-- a)
 vacioAB :: AB a -> Bool
-vacioAB a = if a == Nil then True else False
+vacioAB Nil = True
+vacioAB _ = False
 
--- b) PROBAR SI FUNCIONA!!!
+-- b)
 negacionAB :: AB Bool -> AB Bool
 negacionAB Nil = Nil
-negacionAB (Bin izq valor der) = Bin (negacionAB izq) (not a) Bin(negacionAB der)
+negacionAB (Bin izq valor der) = Bin (negacionAB izq) (not valor) (negacionAB der)
 
--- c) PROBAR SI FUNCIONA!!!
+-- c)
 productoAB :: AB Int -> Int
 productoAB Nil = 1
 productoAB (Bin izq valor der) = productoAB izq * valor * productoAB der
+
