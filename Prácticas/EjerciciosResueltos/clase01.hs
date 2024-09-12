@@ -1,39 +1,48 @@
-curry' :: ((a,b) -> c) -> a -> b -> c
-curry' f x y = f (x, y)
+curry :: ((a,b) -> c) -> a -> b -> c
+curry f x y = f (x, y)
 
-uncurry' :: (a -> b -> c) -> (a, b) -> c
-uncurry' f (x, y) = f x y
+uncurry :: (a -> b -> c) -> (a, b) -> c
+uncurry f (x, y) = f x y
 
-mayor :: Int -> Bool
-mayor = (<=) 18
+prod :: Int -> Int -> Int
+prod x y = x * y
 
-mayor' :: (Integral a) => a -> Bool
-mayor' = (<= 18)
+doble :: Int -> Int
+doble x = prod 2 x
+
+doble' :: Int -> Int
+doble' = prod 2
 
 triple :: Float -> Float
 triple = (*) 3.0
 
-comp :: (a -> b) -> (c -> a) -> (c -> b)
-comp f g x = f (g x)
+esMayorDeEdad :: Int -> Bool
+esMayorDeEdad = (<=) 18
 
-flip' :: (a -> b -> c) -> b -> a -> c
-flip' f x y = f y x
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+(.) f g x = f (g x)
 
-ss :: (a -> b) -> a -> b 
-ss f a = f a
+flip :: (a -> b -> c) -> b -> a -> c
+flip f x y = f y x
 
-const' :: a -> b -> a
--- const' x y = x
+($) :: (a -> b) -> a -> b
+($) f x = f x
+
+const :: a -> b -> a
+const x _ = x
 -- const' x = (\y -> x)
-const' x _ = x
+
+divisiblePor2 :: Int -> Bool
+divisiblePor2 = (== 0) Prelude.. (Prelude.flip mod 2)
 
 maximo :: Ord a => [a] -> a
--- maximo (x:[]) = x
---maximo (x:xs) = if x > maximo xs
---                then x
---                else maximo xs
-maximo = mejorSegun (>)
+maximo (x:[]) = x
+maximo (x:xs) = if x > maximo xs
+                then x
+                else maximo xs
 
+maximo' :: Ord a => [a] -> a
+maximo' = mejorSegun (>)
 
 minimo :: Ord a => [a] -> a
 minimo (x:[]) = x
@@ -47,15 +56,17 @@ listaMasCorta (x:xs) = if length x < length (listaMasCorta xs)
                        then x
                        else listaMasCorta xs
 
+listaMasCorta' :: [[a]] -> [a]
+listaMasCorta' = mejorSegun (\x y -> length x < length y)
+
 mejorSegun :: (a -> a -> Bool) -> [a] -> a
 mejorSegun f [x] = x
---mejorSegun f (x:xs)  
--- | f x (mejorSegun f xs) = x
--- | otherwise = mejorSegun f xs
-
 mejorSegun f (x:y:xs) = if f x y
                         then mejorSegun f (x:xs)
                         else mejorSegun f (y:xs)
+-- la segunda parte de mejorSegun también se puede escribir como:
+-- mejorSegun f (x:xs) | f x (mejorSegun f xs) = x
+--                     | otherwise = mejorSegun f xs
                         
 filter' :: (a -> Bool) -> [a] -> [a]
 filter' p = foldr (\x rec -> if p x
@@ -79,7 +90,7 @@ map' :: (a -> b) -> [a] -> [b]
 map' f = foldr (\x rec -> f x : rec) []
 
 reverseAnidado :: [[Char]] -> [[Char]]
-reverseAnidado = reverse . (map reverse)
+reverseAnidado = reverse Prelude.. (map reverse)
 
 paresCuadrados :: [Int] -> [Int]
 paresCuadrados = map (\x -> if even x
