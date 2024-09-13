@@ -12,7 +12,6 @@ recr f z (x : xs) = f x xs (recr f z xs)
 -- foldl f ac [] = ac
 -- foldl f ac (x : xs) = foldl f (f ac x) xs
 
-
 elem1 :: Eq a => a -> [a] -> Bool
 elem1 e [] = False
 elem1 e (x:xs) = x == e || elem1 e xs
@@ -122,50 +121,92 @@ pares = [(x, y) | s <- [0..], x <- [0..s], y <- [0..s], x + y == s]
 2,0
 -}
 
-data AEB a = Hoja a | Bin (AEB a) a (AEB a)
+-- data AEB a = Hoja a | Bin (AEB a) a (AEB a)
+--     deriving(Show)
+
+-- foldAEB :: (a -> b) -> (b -> a -> b -> b) -> AEB a -> b
+-- foldAEB fHoja fBin t = case t of
+--                        Hoja n -> fHoja n
+--                        Bin t1 n t2 -> fBin (rec t1) n (rec t2)
+--                        where rec = foldAEB fHoja fBin
+
+-- alturaAEB :: AEB a -> Int
+-- alturaAEB = foldAEB (const 1) (\izq _ der -> 1 + max izq der)
+
+-- -- ramasAEB devuelve la cantidad de nodos internos
+-- ramasAEB :: AEB a -> Int
+-- ramasAEB = foldAEB (const 0) (\izq _ der -> 1 + izq + der)
+
+-- -- cantNodosAEB devuelve la cantidad total de nodos incluyendo los internos y las hojas
+-- cantNodosAEB :: AEB a -> Int
+-- cantNodosAEB = foldAEB (const 1) (\izq _ der -> 1 + izq + der)
+
+-- cantHojasAEB :: AEB a -> Int
+-- cantHojasAEB = foldAEB (const 1) (\izq _ der -> izq + der)
+
+-- -- espejoAEB devuelve el arbol pero dado vuelta
+-- -- ejemplo: print (espejoAEB miArbolAEB) / output: Bin (Bin (Hoja 1) 8 (Hoja 7)) 5 (Hoja 3)
+-- espejoAEB :: AEB a -> AEB a
+-- espejoAEB = foldAEB Hoja (\izq n der -> Bin der n izq)
+
+-- -- hojasAEB devuelve la lista con todas las hojas
+-- hojasAEB :: AEB a -> [a]
+-- hojasAEB = foldAEB (: []) (\izq _ der -> izq ++ der)
+
+-- -- nodosAEB devuelve la lista con todos los nodos
+-- nodosAEB :: AEB a -> [a]
+-- nodosAEB = foldAEB (: []) (\izq n der -> n : izq ++ der)
+
+-- -- Ejemplo de arbol binario para probar funciones
+-- {- miArbolAEB:
+--     5
+--    / \
+--   3   8
+--      / \
+--     7   1
+-- -}
+-- miArbolAEB :: AEB Integer
+-- miArbolAEB = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
+
+-------- PARTE COMENTADA PORQUE TENGO CONGLICTO CON EL OTRO TIPO DE ARBOL DEFINIDO ARRIBA ----------
+
+data AB a = Nil | Bin (AB a) a (AB a)
     deriving(Show)
 
-foldAEB :: (a -> b) -> (b -> a -> b -> b) -> AEB a -> b
-foldAEB fHoja fBin t = case t of
-                       Hoja n -> fHoja n
-                       Bin t1 n t2 -> fBin (rec t1) n (rec t2)
-                       where rec = foldAEB fHoja fBin
+--La función insertarABB utiliza la recursión estructural
 
-alturaAEB :: AEB a -> Int
-alturaAEB = foldAEB (const 1) (\izq _ der -> 1 + max izq der)
+insertarABB :: Ord a => a -> AB a -> AB a
+insertarABB x Nil = Bin Nil x Nil
+insertarABB x (Bin i r d) = if x < r
+                            then Bin (insertarABB x i) r d
+                            else Bin i r (insertarABB x d)
 
--- ramasAEB devuelve la cantidad de nodos internos
-ramasAEB :: AEB a -> Int
-ramasAEB = foldAEB (const 0) (\izq _ der -> 1 + izq + der)
+--La función truncar utiliza la recursión estructural
 
--- cantNodosAEB devuelve la cantidad total de nodos incluyendo los internos y las hojas
-cantNodosAEB :: AEB a -> Int
-cantNodosAEB = foldAEB (const 1) (\izq _ der -> 1 + izq + der)
+truncar :: AB a -> Int -> AB a
+truncar Nil _ = Nil
+truncar (Bin i r d) n = if n == 0
+                        then Nil
+                        else Bin (truncar i (n - 1)) r (truncar d (n - 1))
 
-cantHojasAEB :: AEB a -> Int
-cantHojasAEB = foldAEB (const 1) (\izq _ der -> izq + der)
+--foldABB :: (a -> b) -> (b -> a -> b -> b) -> AB a -> b
+foldABB :: t1 -> (t1 -> t2 -> t1 -> t1) -> AB t2 -> t1
+foldABB fNil fBin t = case t of
+                      Nil -> fNil
+                      Bin t1 n t2 -> fBin (rec t1) n (rec t2)
+                      where rec = foldABB fNil fBin
 
-espejoAEB :: AEB a -> AEB a
-espejoAEB = foldAEB Hoja (\izq n der -> Bin (espejoAEB der) n (espejoAEB izq))
-    
--- hojas :: AEB a -> [a]
--- hojas = foldAEB (\r ri rd -> ri ++ rd) (\h -> [h])
+-- Está mal
+insertarABB' :: Ord a => a -> AB a -> AB a
+insertarABB' x = foldABB (Bin Nil x Nil) (\left v right -> if x < v
+                                                           then left
+                                                           else right)
 
--- nodos :: AEB a -> [a]
--- nodos = foldAEB (\r ri rd -> r : ri ++ rd) (\h -> [h])
+-- ejemplo de arbol AB
+arbolAB :: AB Int
+arbolAB = Bin (Bin Nil 1 Nil) 2 (Bin Nil 3 Nil)
 
--- Ejemplo de arbol binario para probar funciones
-{- miArbolAEB:
-    5
-   / \
-  3   8
-     / \
-    7   1
--}
-miArbolAEB :: AEB Integer
-miArbolAEB = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
-
-
+-------- PARTE COMENTADA PORQUE TENGO CONGLICTO CON EL OTRO TIPO DE ARBOL DEFINIDO ARRIBA ----------
 
 data Polinomio a = X
                  | Cte a
@@ -256,14 +297,3 @@ complemento c1 = not.c1
 
 Ag(1, Ag(2, Ag(3, {})))
 -}
-
-
-
-
-
-
-
-
-
-
-
