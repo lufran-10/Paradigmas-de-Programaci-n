@@ -67,35 +67,56 @@ mejorSegun f (x:y:xs) = if f x y
 -- la segunda parte de mejorSegun también se puede escribir como:
 -- mejorSegun f (x:xs) | f x (mejorSegun f xs) = x
 --                     | otherwise = mejorSegun f xs
-                        
+
+-- A PARTIR DE ACA ME FALTA AGREGAR LAS FUNCIONES AL PDF!!!!!!!!
+
+filter :: (a -> Bool) -> [a] -> [a]
+filter _ [] = []
+filter p (x:xs) = if p x
+                  then x : Main.filter p xs
+                  else Main.filter p xs
+
 filter' :: (a -> Bool) -> [a] -> [a]
-filter' p = foldr (\x rec -> if p x
-                             then (:) x rec
-                             else rec) []
-{--
-filter' p = foldr (\x -> if p x
-                         then (:) x
-                         else id) [] 
---}
+filter' p = foldr (\x rec -> if p x then (:) x rec else rec) []
+
+-- otra manera de escribir filter' con foldr:
+-- filter' :: (a -> Bool) -> [a] -> [a]
+-- filter' p = foldr (\x -> if p x then (:) x else id) [] 
+
 
 deLongitudN :: Int -> [[a]] -> [[a]]
-deLongitudN n = filter (\x -> length x == n)
+deLongitudN n = Prelude.filter (\x -> length x == n)
+
+-- otra manera de escribir deLongitudN:
 -- deLongitudN n = filter ((== n) . length)
 
 soloPuntosFijosEnN :: Int -> [Int->Int] -> [Int->Int]
-soloPuntosFijosEnN n = filter (\f -> f n == n)
+soloPuntosFijosEnN n = Prelude.filter (\f -> f n == n)
+
+map :: (a -> b) -> [a] -> [b]
+map _ [] = []
+map f (x:xs) = f x : Main.map f xs
 
 map' :: (a -> b) -> [a] -> [b]
--- map' f = foldr ((:) . f) []
 map' f = foldr (\x rec -> f x : rec) []
 
+-- otra manera de escribir map' uando foldr:
+-- map' f = foldr ((:) . f) []
+
 reverseAnidado :: [[Char]] -> [[Char]]
-reverseAnidado = reverse Prelude.. (map reverse)
+reverseAnidado = reverse Prelude.. Prelude.map reverse
 
 paresCuadrados :: [Int] -> [Int]
-paresCuadrados = map (\x -> if even x
-                            then x*x
-                            else x)
-                            
+paresCuadrados = Prelude.map (\x -> if even x then x * x else x)
+
 listaComp :: (a -> b) -> [a] -> (a -> Bool) -> [b]
-listaComp f xs p = map f (filter p xs)
+listaComp f xs p = [f x | x <- xs, p x]
+
+listaComp' :: (a -> b) -> [a] -> (a -> Bool) -> [b]
+listaComp' f xs p = Prelude.map f (Prelude.filter p xs)
+
+mejorSegun' :: (a -> a -> Bool) -> [a] -> a
+mejorSegun' f = foldr1 (\x y -> if f x y then x else y)
+
+mejorSegun'' :: (a -> a -> Bool) -> [a] -> a
+mejorSegun'' f = foldl1 (\x y -> if f x y then x else y)
