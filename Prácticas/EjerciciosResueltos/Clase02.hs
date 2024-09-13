@@ -1,3 +1,5 @@
+-- TENGO QUE AGREGAR TODAS LAS FUNCIONES AL PDF!!!!
+
 -- foldr :: (a -> b -> b) -> b -> [a] -> b
 -- foldr f z [] = z
 -- foldr f z (x : xs) = f x (foldr f z xs)
@@ -11,85 +13,73 @@ recr f z (x : xs) = f x xs (recr f z xs)
 -- foldl f ac (x : xs) = foldl f (f ac x) xs
 
 
+elem1 :: Eq a => a -> [a] -> Bool
+elem1 e [] = False
+elem1 e (x:xs) = x == e || elem1 e xs
+
+-- usando foldr:
 elem2 :: Eq a => a -> [a] -> Bool
-elem2 e []     = False
-elem2 e (x:xs) = x == e || elem2 e xs
+elem2 e = foldr (\x rec -> x == e || rec) False
 
-elem3 e = foldr (\x rec -> x == e || rec) False
+-- usando foldl:
+elem3 :: Eq a => a -> [a] -> Bool
+elem3 e = foldl (\acc x -> acc || x == e) False
 
+-- usando recr (no conviene usarlo ya que en ningun momento se usa xs en la función):
+elem4 :: Eq a => a -> [a] -> Bool
+elem4 e = recr (\x xs acc -> x == e || acc) False
 
 {-
-sumaAlternada [1,2,3,4] --> 1 - 2 + 3 - 4
-
-sumaAlternada [2,3,4] --> 2 - 3 + 4
-
-f 1 (2 - 3 + 4) --> 1 - 2 + 3 - 4
-
-                    1 - (2 - 3 + 4)
-
-sumaAlternada [] = 0
-sumaAlternada (x:xs) = x - (sumaAlternada xs)
-
-sumaAlternada = foldr (\x rec -> x - rec) 0 
-
-[1,2,3,4]
---> 1 - sA [2,3,4]
-        2  - sA [3,4]
-              3 - sA [4]
-                   ...
-                   4
-
-              -1
-        3
-    -2
-
-
-
+sumaAlternada [1,2,3,4] --> 1 - 2 + 3 - 4 / output: -2
+sumaAlternada [2,3,4] --> 2 - 3 + 4 / output: 3
+sumaAlternada [] / output: 0
 -}
-sumaAlternada :: Num a => [a] -> a
-sumaAlternada = foldr (-) 0 
--- sumaAlternada = foldr1 (-)
 
+sumaAlternada1 :: Num a => [a] -> a
+sumaAlternada1 [] = 0
+sumaAlternada1 (x:xs) = x - (sumaAlternada1 xs)
 
+-- usando foldr:
+sumaAlternada2 :: Num a => [a] -> a
+sumaAlternada2 = foldr (-) 0 
+
+-- usando foldr1 (no conviene usarla porque no contempla el caso de la lista vacia):
+sumaAlternada3 :: Num a => [a] -> a
+sumaAlternada3 = foldr1 (-)
+
+-- para sumaAlternada el uso de foldl no conviene ya que al implementarse quedaria algo de este estilo (((0 - x1) - x2) - x3) = 0 - x1 - x2 - x3, donde nunca aparece un +. En cambio al usar foldr se obtiene algo del estilo x1 - (x2 - (x3 - 0)) = x1 - x2 + x3 - 0
+
+-- la implementación de sumaAlternada usando recr es posible, pero al igual que con foldl, es mas complicada y menos conveniente que la que usa foldr.
 
 take2 :: Int -> [a]-> [a]
-take2 n []     = []
+take2 n [] = []
 take2 n (x:xs) = if n == 0 then [] else x : take2 (n-1) xs
 
+take3 :: [a] -> Int -> [a]
+take3 [] n = []
+take3 (x:xs) n = if n == 0 then [] else x : take3 xs (n-1)
 
-take3 :: [a] -> (Int -> [a])
-take3  []     n = []
-take3  (x:xs) n = if n == 0 then [] else x : take3 xs (n-1)
+take4 :: [a] -> Int -> [a]
+take4 [] = const []
+take4 (x:xs) = \n -> if n == 0 then [] else x : take4 xs (n-1)
 
-take4 :: [a] -> (Int -> [a])
-take4  []     = \n -> [] -- const []
-take4  (x:xs) = \n -> if n == 0 then [] else x : take4 xs (n-1)
-
-
-take5 :: [a] -> (Int -> [a])
-take5 = foldr (\x rec -> \n -> if n == 0 then [] else x : rec (n-1)) 
-              (\n -> [])
-
+-- usando foldr:
+take5 :: [a] -> Int -> [a]
+take5 = foldr (\ x rec n -> if n == 0 then [] else x : rec (n - 1)) (const [])
 
 take6 :: Int -> [a] -> [a]
 take6 = flip take5
 
---Pensar take con foldNat
+sacarUna1 :: Eq a => a -> [a] -> [a]
+sacarUna1 e [] = []
+sacarUna1 e (x:xs) = if e == x then xs else x : sacarUna1 e xs
 
-
-
-
-sacarUna:: Eq a => a -> [a] -> [a]
-sacarUna e []     = []
-sacarUna e (x:xs) = if e == x then xs else x : sacarUna e xs
-
+sacarUna2 :: Eq a => a -> [a] -> [a]
 sacarUna2 e = recr (\x xs rec -> if e == x then xs else x : rec) []
-
 
 {-
 g [] = z
 g (x:xs) = f x (g xs)
-
 
 x
 xs
@@ -98,11 +88,32 @@ g
 estructural --> x (g xs)
 primitiva --> x (g xs) xs
 global --> x xs g
+
+Recursión Estructural: Recursión basada en la estructura de datos, donde la llamada recursiva opera sobre partes de la estructura.
+Recursión Primitiva: Recursión basada en la reducción sistemática y directa de argumentos, comúnmente en estructuras como números naturales.
+Recursión Global: Recursión que puede involucrar múltiples funciones recursivas y estados globales, con una estructura más compleja.
 -}
 
+-- take' es una función que usa recursión estructural (take' es igual a take3)
+
+-- listasQueSuman es una función que utiliza recursión etructural
+listasQueSuman :: (Num a, Enum a) => Int -> [[a]]
+listasQueSuman 0 = [[]]
+listasQueSuman n | n > 0 = [x : xs | x <- [1..], xs <- listasQueSuman (n - 1)]
+
+-- fact es una función que usa recursión primitiva
+fact :: Int -> Int
+fact 0 = 1
+fact n | n > 0 = n * fact (n - 1)
+
+-- fibonacci es una función que usa recursión global
+fibonacci :: Int -> Int
+fibonacci 0 = 1
+fibonacci 1 = 1
+fibonacci n | n > 1 = fibonacci (n - 1) + fibonacci (n - 2)
 
 pares :: [(Int, Int)]
-pares = [(x,y) | s <- [0..], x <- [0..s], y <- [0..s], x + y == s]
+pares = [(x, y) | s <- [0..], x <- [0..s], y <- [0..s], x + y == s]
 
 {-
 0,0
@@ -111,26 +122,48 @@ pares = [(x,y) | s <- [0..], x <- [0..s], y <- [0..s], x + y == s]
 2,0
 -}
 
-
-
 data AEB a = Hoja a | Bin (AEB a) a (AEB a)
+    deriving(Show)
 
+foldAEB :: (a -> b) -> (b -> a -> b -> b) -> AEB a -> b
+foldAEB fHoja fBin t = case t of
+                       Hoja n -> fHoja n
+                       Bin t1 n t2 -> fBin (rec t1) n (rec t2)
+                       where rec = foldAEB fHoja fBin
 
-foldAEB :: (a -> b -> b -> b) -> (a -> b) -> AEB a -> b
-foldAEB fBin fHoja t = case t of
-                            Hoja h    -> fHoja h
-                            Bin i r d -> fBin r (rec i) (rec d)
-    where rec = foldAEB fBin fHoja
+alturaAEB :: AEB a -> Int
+alturaAEB = foldAEB (const 1) (\izq _ der -> 1 + max izq der)
+
+-- ramasAEB devuelve la cantidad de nodos internos
+ramasAEB :: AEB a -> Int
+ramasAEB = foldAEB (const 0) (\izq _ der -> 1 + izq + der)
+
+-- cantNodosAEB devuelve la cantidad total de nodos incluyendo los internos y las hojas
+cantNodosAEB :: AEB a -> Int
+cantNodosAEB = foldAEB (const 1) (\izq _ der -> 1 + izq + der)
+
+cantHojasAEB :: AEB a -> Int
+cantHojasAEB = foldAEB (const 1) (\izq _ der -> izq + der)
+
+espejoAEB :: AEB a -> AEB a
+espejoAEB = foldAEB Hoja (\izq n der -> Bin (espejoAEB der) n (espejoAEB izq))
     
+-- hojas :: AEB a -> [a]
+-- hojas = foldAEB (\r ri rd -> ri ++ rd) (\h -> [h])
 
-hojas :: AEB a -> [a]
-hojas = foldAEB (\r ri rd -> ri ++ rd) (\h -> [h])
+-- nodos :: AEB a -> [a]
+-- nodos = foldAEB (\r ri rd -> r : ri ++ rd) (\h -> [h])
 
-nodos :: AEB a -> [a]
-nodos = foldAEB (\r ri rd -> r : ri ++ rd) (\h -> [h])
-
-
-miArbol = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
+-- Ejemplo de arbol binario para probar funciones
+{- miArbolAEB:
+    5
+   / \
+  3   8
+     / \
+    7   1
+-}
+miArbolAEB :: AEB Integer
+miArbolAEB = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
 
 
 
@@ -223,7 +256,6 @@ complemento c1 = not.c1
 
 Ag(1, Ag(2, Ag(3, {})))
 -}
-
 
 
 
