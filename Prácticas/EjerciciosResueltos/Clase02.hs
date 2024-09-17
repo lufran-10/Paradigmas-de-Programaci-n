@@ -189,18 +189,8 @@ truncar (Bin i r d) n = if n == 0
                         then Nil
                         else Bin (truncar i (n - 1)) r (truncar d (n - 1))
 
---foldABB :: (a -> b) -> (b -> a -> b -> b) -> AB a -> b
-foldABB :: t1 -> (t1 -> t2 -> t1 -> t1) -> AB t2 -> t1
-foldABB fNil fBin t = case t of
-                      Nil -> fNil
-                      Bin t1 n t2 -> fBin (rec t1) n (rec t2)
-                      where rec = foldABB fNil fBin
 
--- Está mal
-insertarABB' :: Ord a => a -> AB a -> AB a
-insertarABB' x = foldABB (Bin Nil x Nil) (\left v right -> if x < v
-                                                           then left
-                                                           else right)
+-- FALTA HACER EL FOLDABB Y LAS FUNCIONES INSERTARABB Y TRUNCAR USANDO ESE FOLDABB!!!!!!!!!!!
 
 -- ejemplo de arbol AB
 arbolAB :: AB Int
@@ -216,26 +206,21 @@ data Polinomio a = X
 
 evaluar :: Num a => a -> Polinomio a -> a
 evaluar x pol = case pol of
-                    X        -> x
-                    Cte c    -> c
-                    Suma p q -> evaluar x p + evaluar x q
-                    Prod p q -> evaluar x p * evaluar x q
+                X        -> x
+                Cte c    -> c
+                Suma p q -> evaluar x p + evaluar x q
+                Prod p q -> evaluar x p * evaluar x q
 
-foldPoli :: (b) -> (a -> b) -> (b -> b -> b) -> (b -> b -> b) -> Polinomio a -> b 
+foldPoli :: b -> (a -> b) -> (b -> b -> b) -> (b -> b -> b) -> Polinomio a -> b 
 foldPoli fX fCte fSuma fProd pol = case pol of 
-                                        X        -> fX
-                                        Cte c    -> fCte c
-                                        Suma p q -> fSuma (rec p) (rec q)
-                                        Prod p q -> fProd (rec p) (rec q)
+                                    X        -> fX
+                                    Cte c    -> fCte c
+                                    Suma p q -> fSuma (rec p) (rec q)
+                                    Prod p q -> fProd (rec p) (rec q)
     where rec = foldPoli fX fCte fSuma fProd
 
-
-evaluar2 :: Num a => a -> Polinomio a -> a
-evaluar2 x = foldPoli x id (+) (*)
-
-
-
-
+evaluar' :: Num a => a -> Polinomio a -> a
+evaluar' x = foldPoli x id (+) (*)
 
 
 data RoseTree a = Rose a [RoseTree a]
@@ -260,8 +245,9 @@ hojasRT = foldRT (\n rec -> if null rec then [n] else concat rec)
 altura :: RoseTree a -> Int
 altura = foldRT (\_ rec -> if null rec then 0 else 1 + maximum rec)
 
-
+miRT :: RoseTree Integer
 miRT = Rose 1 [Rose 2 [Rose 3 [], Rose 4 [Rose 5 [], Rose 6 [], Rose 7 []]]]
+
 
 {-
 [[[4,5], [4,6], [4,7]],[[3]]]
