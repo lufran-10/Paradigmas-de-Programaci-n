@@ -45,3 +45,49 @@ esParL (x:xs) = (even x) : (esParL xs)
 longL :: [[a]] -> [Int]
 longL [] = []
 longL (x:xs) = (length x) : (longL xs)
+
+map' :: (a -> b) -> [a] -> [b]
+map' f [] = []
+map' f (x:xs) = (f x) : (map' f xs)
+
+-- Práctica 0
+
+promedio :: Fractional a => a -> a -> a
+promedio x y = (x + y) / 2
+
+maximo :: Ord a => a -> a -> a
+maximo x y | x > y = x
+           | otherwise = y
+
+factorial :: Int -> Int
+factorial 0 = 1
+factorial n = n * factorial (n - 1)
+
+-- incN le suma n a cada elemento de la lista
+incN :: Num t => t -> [t] -> [t]
+incN n [] = []
+incN n (x:xs) = (n + x) : incN n xs
+
+-- a1 suma x e y. Solo funciona cuando y es mayor o igual a cero
+a1 :: (Eq t1, Num t1, Num t2) => t2 -> t1 -> t2
+a1 x 0 = x
+a1 x y = a1 x (y - 1) + 1
+
+-- a2 multiplica a x por y. Solo funciona bien si x e y son mayores o iguales a cero
+a2 :: (Eq t, Num t, Num a) => a -> t -> a
+a2 x 0 = 0
+a2 x y = a2 x (y - 1) + x
+
+-- a3 eleva a x a la y. Solo funciona si y es mayor o igual a cero
+a3 :: (Eq t, Num t, Num a) => a -> t -> a
+a3 x 0 = 1
+a3 x y = a3 x (y - 1) * x
+
+inverso :: Float -> Maybe Float
+inverso 0 = Nothing
+inverso n = Just (1 / n)
+
+aEntero :: Either Int Bool -> Int
+aEntero x = case x of
+        (Left n) -> n
+        (Right b) -> if b then 1 else 0
