@@ -153,11 +153,11 @@ todosIguales (y:[]) = True
 todosIguales (x:y:ys) = if x == y then todosIguales (y:ys) else False
 
 -- Ejercicio 5
--- Modelo para àrboles binarios:
+-- Modelo para árboles binarios:
 data AB a = Nil | Bin (AB a) a (AB a)
   deriving (Show, Eq)         -- Para poder imprimir el arbol
 
--- Para probar contruí estos árboles:
+-- Para probar construí estos árboles:
 arbolVacio :: AB a
 arbolVacio = Nil
 
@@ -187,4 +187,3 @@ negacionAB (Bin izq valor der) = Bin (negacionAB izq) (not valor) (negacionAB de
 productoAB :: AB Int -> Int
 productoAB Nil = 1
 productoAB (Bin izq valor der) = productoAB izq * valor * productoAB der
-
