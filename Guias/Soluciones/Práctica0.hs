@@ -115,7 +115,7 @@ aEntero n = case n of
 
 -- Esta función se ejecuta como:
   -- aEntero (Left 42) / output: 42
-  -- aEntero (Right True) / output: True
+  -- aEntero (Right True) / output: 1
 
 -- Ejercicio 4
 

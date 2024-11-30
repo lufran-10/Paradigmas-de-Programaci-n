@@ -1,16 +1,23 @@
--- TENGO QUE AGREGAR TODAS LAS FUNCIONES AL PDF!!!!
+-- Práctica 2
 
--- foldr :: (a -> b -> b) -> b -> [a] -> b
--- foldr f z [] = z
--- foldr f z (x : xs) = f x (foldr f z xs)
+{-
+Recursión estructural:
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr f z [] = z
+foldr f z (x : xs) = f x (foldr f z xs)
+-}
 
+-- Recursión primitiva:
 recr :: (a -> [a] -> b -> b) -> b -> [a] -> b
 recr f z [] = z
 recr f z (x : xs) = f x xs (recr f z xs)
 
--- foldl :: (b -> a -> b) -> b -> [a] -> b
--- foldl f ac [] = ac
--- foldl f ac (x : xs) = foldl f (f ac x) xs
+{-
+Recursión iterativa:
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldl f ac [] = ac
+foldl f ac (x : xs) = foldl f (f ac x) xs
+-}
 
 elem1 :: Eq a => a -> [a] -> Bool
 elem1 e [] = False
@@ -64,7 +71,7 @@ take4 (x:xs) = \n -> if n == 0 then [] else x : take4 xs (n-1)
 
 -- usando foldr:
 take5 :: [a] -> Int -> [a]
-take5 = foldr (\ x rec n -> if n == 0 then [] else x : rec (n - 1)) (const [])
+take5 = foldr (\x rec n -> if n == 0 then [] else x : rec (n - 1)) (const [])
 
 take6 :: Int -> [a] -> [a]
 take6 = flip take5
@@ -93,9 +100,13 @@ Recursión Primitiva: Recursión basada en la reducción sistemática y directa 
 Recursión Global: Recursión que puede involucrar múltiples funciones recursivas y estados globales, con una estructura más compleja.
 -}
 
--- take' es una función que usa recursión estructural (take' es igual a take3)
+take' :: [a] -> Int -> [a]
+take' [] _ = []
+take' (x:xs) n = if n == 0 then [] else x : take' xs (n-1)
 
--- listasQueSuman es una función que utiliza recursión etructural
+-- take' es una función que usa recursión estructural (take' es igual a take3 de más arriba)
+
+-- listasQueSuman es una función que utiliza recursión global
 listasQueSuman :: (Num a, Enum a) => Int -> [[a]]
 listasQueSuman 0 = [[]]
 listasQueSuman n | n > 0 = [x : xs | x <- [1..], xs <- listasQueSuman (n - 1)]
@@ -121,88 +132,99 @@ pares = [(x, y) | s <- [0..], x <- [0..s], y <- [0..s], x + y == s]
 2,0
 -}
 
--- data AEB a = Hoja a | Bin (AEB a) a (AEB a)
---     deriving(Show)
-
--- foldAEB :: (a -> b) -> (b -> a -> b -> b) -> AEB a -> b
--- foldAEB fHoja fBin t = case t of
---                        Hoja n -> fHoja n
---                        Bin t1 n t2 -> fBin (rec t1) n (rec t2)
---                        where rec = foldAEB fHoja fBin
-
--- alturaAEB :: AEB a -> Int
--- alturaAEB = foldAEB (const 1) (\izq _ der -> 1 + max izq der)
-
--- -- ramasAEB devuelve la cantidad de nodos internos
--- ramasAEB :: AEB a -> Int
--- ramasAEB = foldAEB (const 0) (\izq _ der -> 1 + izq + der)
-
--- -- cantNodosAEB devuelve la cantidad total de nodos incluyendo los internos y las hojas
--- cantNodosAEB :: AEB a -> Int
--- cantNodosAEB = foldAEB (const 1) (\izq _ der -> 1 + izq + der)
-
--- cantHojasAEB :: AEB a -> Int
--- cantHojasAEB = foldAEB (const 1) (\izq _ der -> izq + der)
-
--- -- espejoAEB devuelve el arbol pero dado vuelta
--- -- ejemplo: print (espejoAEB miArbolAEB) / output: Bin (Bin (Hoja 1) 8 (Hoja 7)) 5 (Hoja 3)
--- espejoAEB :: AEB a -> AEB a
--- espejoAEB = foldAEB Hoja (\izq n der -> Bin der n izq)
-
--- -- hojasAEB devuelve la lista con todas las hojas
--- hojasAEB :: AEB a -> [a]
--- hojasAEB = foldAEB (: []) (\izq _ der -> izq ++ der)
-
--- -- nodosAEB devuelve la lista con todos los nodos
--- nodosAEB :: AEB a -> [a]
--- nodosAEB = foldAEB (: []) (\izq n der -> n : izq ++ der)
-
--- -- Ejemplo de arbol binario para probar funciones
--- {- miArbolAEB:
---     5
---    / \
---   3   8
---      / \
---     7   1
--- -}
--- miArbolAEB :: AEB Integer
--- miArbolAEB = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
-
--------- PARTE COMENTADA PORQUE TENGO CONGLICTO CON EL OTRO TIPO DE ARBOL DEFINIDO ARRIBA ----------
-
-data AB a = Nil | Bin (AB a) a (AB a)
+-- Definición de un arbol binario:
+data AEB a = Hoja a | Bin (AEB a) a (AEB a)
     deriving(Show)
 
---La función insertarABB utiliza la recursión estructural
+-- Ejemplo de arbol binario para probar funciones
+{- miArbolAEB:
+    5
+   / \
+  3   8
+     / \
+    7   1
+-}
+miArbolAEB :: AEB Integer
+miArbolAEB = Bin (Hoja 3) 5 (Bin (Hoja 7) 8 (Hoja 1))
 
-insertarABB :: Ord a => a -> AB a -> AB a
-insertarABB x Nil = Bin Nil x Nil
-insertarABB x (Bin i r d) = if x < r
-                            then Bin (insertarABB x i) r d
-                            else Bin i r (insertarABB x d)
+foldAEB :: (a -> b) -> (b -> a -> b -> b) -> AEB a -> b
+foldAEB fHoja fBin t = case t of
+                       Hoja n -> fHoja n
+                       Bin t1 n t2 -> fBin (rec t1) n (rec t2)
+                       where rec = foldAEB fHoja fBin
 
---La función truncar utiliza la recursión estructural
+alturaAEB :: AEB a -> Int
+alturaAEB = foldAEB (const 1) (\izq _ der -> 1 + max izq der)
 
-truncar :: AB a -> Int -> AB a
-truncar Nil _ = Nil
-truncar (Bin i r d) n = if n == 0
-                        then Nil
-                        else Bin (truncar i (n - 1)) r (truncar d (n - 1))
+-- ramasAEB devuelve una lista con todas las ramas del arbol
+ramasAEB :: AEB a -> [[a]]
+ramasAEB = foldAEB (\n -> [[n]]) (\izq n der -> map (n :) (izq ++ der))
+
+-- cantNodosAEB devuelve la cantidad total de nodos incluyendo los internos y las hojas
+cantNodosAEB :: AEB a -> Int
+cantNodosAEB = foldAEB (const 1) (\izq _ der -> 1 + izq + der)
+
+cantHojasAEB :: AEB a -> Int
+cantHojasAEB = foldAEB (const 1) (\izq _ der -> izq + der)
+
+-- espejoAEB devuelve el arbol pero dado vuelta
+-- ejemplo: print (espejoAEB miArbolAEB) / output: Bin (Bin (Hoja 1) 8 (Hoja 7)) 5 (Hoja 3)
+espejoAEB :: AEB a -> AEB a
+espejoAEB = foldAEB Hoja (\izq n der -> Bin der n izq)
+
+-- hojasAEB devuelve la lista con todas las hojas
+hojasAEB :: AEB a -> [a]
+hojasAEB = foldAEB (: []) (\izq _ der -> izq ++ der)
+
+-- nodosAEB devuelve la lista con todos los nodos
+nodosAEB :: AEB a -> [a]
+nodosAEB = foldAEB (: []) (\izq n der -> n : izq ++ der)
 
 
--- FALTA HACER EL FOLDABB Y LAS FUNCIONES INSERTARABB Y TRUNCAR USANDO ESE FOLDABB!!!!!!!!!!!
+data AB a = Nil | Bin' (AB a) a (AB a)
+    deriving(Show)
 
 -- ejemplo de arbol AB
 arbolAB :: AB Int
-arbolAB = Bin (Bin Nil 1 Nil) 2 (Bin Nil 3 Nil)
+arbolAB = Bin' (Bin' Nil 1 Nil) 2 (Bin' Nil 3 Nil)
 
--------- PARTE COMENTADA PORQUE TENGO CONGLICTO CON EL OTRO TIPO DE ARBOL DEFINIDO ARRIBA ----------
+-- Recursión estructural de un arbol AB:
+foldAB :: b -> (b -> a -> b -> b) -> AB a -> b
+foldAB cNil cBin Nil = cNil
+foldAB cNil cBin (Bin' i r d) = cBin (foldAB cNil cBin i) r (foldAB cNil cBin d)
+
+-- Recursión primitiva de un arbol AB:
+recAB :: b -> (AB a -> b -> a -> AB a -> b -> b) -> AB a -> b
+recAB cNil cBin Nil = cNil
+recAB cNil cBin (Bin' i r d) = cBin i (recAB cNil cBin i) r d (recAB cNil cBin d)
+
+-- La función insertarABB utiliza la recursión primitiva
+insertarABB :: Ord a => a -> AB a -> AB a
+insertarABB x Nil = Bin' Nil x Nil
+insertarABB x (Bin' i r d) = if x < r
+                            then Bin' (insertarABB x i) r d
+                            else Bin' i r (insertarABB x d)
+
+-- Versión de insertarABB con recAB:
+insertarABB' :: Ord a => a -> AB a -> AB a
+insertarABB' x = recAB (Bin' Nil x Nil) (\i ri r d rd -> if x < r then Bin' ri r d else Bin' i r rd)
+
+-- La función truncar utiliza la recursión estructural
+truncar :: AB a -> Int -> AB a
+truncar Nil _ = Nil
+truncar (Bin' i r d) n = if n == 0
+                        then Nil
+                        else Bin' (truncar i (n - 1)) r (truncar d (n - 1))
+
+-- Versión de trucar usando foldAB:
+truncar' :: AB a -> Int -> AB a
+truncar' t n = foldAB (\_ -> Nil) (\i r d n -> if n == 0 then Nil else Bin' (i (n - 1)) r (d (n - 1))) t n
+
 
 data Polinomio a = X
                  | Cte a
                  | Suma (Polinomio a) (Polinomio a)
                  | Prod (Polinomio a) (Polinomio a)
-
 
 evaluar :: Num a => a -> Polinomio a -> a
 evaluar x pol = case pol of
@@ -224,6 +246,10 @@ evaluar' x = foldPoli x id (+) (*)
 
 
 data RoseTree a = Rose a [RoseTree a]
+    deriving(Show)
+
+-- ejemplo de RoseTree:
+arbolRT = Rose 1 [Rose 2 [Rose 4 [], Rose 5 []], Rose 3 []]
 
 foldRT :: (a -> [b] -> b) -> RoseTree a -> b 
 foldRT fRose (Rose n hijos) = fRose n (map rec hijos)
@@ -235,36 +261,28 @@ recRT fRose (Rose n hijos) = fRose n hijos (map rec hijos)
 
 -- foldRT f = recRT (\n _ rec -> f n rec)
 
-
-cantNodos :: RoseTree a -> Int
-cantNodos = foldRT (\n rhijos -> 1 + sum rhijos)
+-- tamañoRT devuelve la cantidad total de nodos:
+tamañoRT :: RoseTree a -> Int
+tamañoRT = foldRT (\n rhijos -> 1 + sum rhijos)
 
 hojasRT :: RoseTree a -> [a]
 hojasRT = foldRT (\n rec -> if null rec then [n] else concat rec)
 
-altura :: RoseTree a -> Int
-altura = foldRT (\_ rec -> if null rec then 0 else 1 + maximum rec)
+ramasRT :: RoseTree a -> [[a]]
+ramasRT = foldRT (\n ns -> if null ns then [[n]] else map (n :) (concat ns))
 
-miRT :: RoseTree Integer
-miRT = Rose 1 [Rose 2 [Rose 3 [], Rose 4 [Rose 5 [], Rose 6 [], Rose 7 []]]]
+alturaRT :: RoseTree a -> Int
+alturaRT = foldRT (\_ rec -> if null rec then 1 else 1 + maximum rec)
 
 
-{-
-[[[4,5], [4,6], [4,7]],[[3]]]
--}
+type Conj a = (a -> Bool)
 
-type Conj a = (a->Bool)
-
+-- Conjunto vacio:
 vacio :: Conj a
-
-solo1 = \e -> if e == 1 then True else False
-
 vacio = const False
 
 agregar :: Eq a => a -> Conj a -> Conj a
-agregar e c = \e2 -> e2 == e || c e2
-
-udt = agregar 1 (agregar 2 (agregar 3 vacio))
+agregar e c = \x -> x == e || c x
 
 interseccion :: Conj a -> Conj a-> Conj a
 interseccion c1 c2 = \e -> c1 e && c2 e
@@ -278,8 +296,32 @@ diferencia c1 c2 = \e -> c1 e && not (c2 e)
 complemento :: Conj a -> Conj a
 complemento c1 = not.c1
 
-{-
-{1,2,3}
+-- Conjunto de números pares
+conjPares :: Conj Int
+conjPares x = x `mod` 2 == 0
 
-Ag(1, Ag(2, Ag(3, {})))
+-- Conjunto de números mayores que 5
+mayoresQue5 :: Conj Int
+mayoresQue5 x = x > 5
+
+-- Agregar un número al conjunto vacío
+singleton3 :: Conj Int
+singleton3 = agregar 3 vacio
+
+{-
+Ejemplos de ejecución:
+> conjPares 4
+True
+
+> mayoresQue5 4
+False
+
+> interseccion conjPares mayoresQue5 6
+True
+
+> union conjPares mayoresQue5 4
+True
+
+> diferencia conjPares mayoresQue5 6
+False
 -}
